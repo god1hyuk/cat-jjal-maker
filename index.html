@@ -43,6 +43,13 @@
       },
     };
 
+    const fetchCat = async (text) => {
+      const OPEN_API_DOMAIN = "https://cataas.com";
+      const response = await fetch(`${OPEN_API_DOMAIN}/cat/says/${text}?json=true`);
+      const responseJson = await response.json();
+      return `${OPEN_API_DOMAIN}/${responseJson.url}`;
+    };
+
     const Title = (props) => {
       return <h1>{props.children}</h1>;
     }
@@ -60,7 +67,7 @@
           setErrorMessage("빈 값으로 만들 수 없습니다.");
           return;
         }
-        updateMainCat();
+        updateMainCat(value);
       }
 
       function handleInputChange(e) {
@@ -128,13 +135,29 @@
       //   "https://cataas.com/cat/595f280b557291a9750ebf65/says/JavaScript"
       // ];
       const getCounter = jsonLocalStorage.getItem('counter');
-      const [counter, setCounter] = React.useState(getCounter || 0);
+      const [counter, setCounter] = React.useState(getCounter);
       const [mainCat, setMainCat] = React.useState(CAT1);
       const getFavorites = jsonLocalStorage.getItem('favorites');
       const [favorites, setFavorites] = React.useState(getFavorites || []);
 
-      function updateMainCat() {
-        setMainCat(CAT2);
+      async function setInitialCat() {
+        const newCat = await fetchCat("First cat");
+        // console.log(newCat);
+        setMainCat(newCat);
+      }
+
+      React.useEffect(() => {
+        setInitialCat();
+      }, []);
+
+      React.useEffect(() => {
+        console.log("헬로");
+      }, [counter]);
+
+      async function updateMainCat(value) {
+        const newCat = await fetchCat(value);
+
+        setMainCat(newCat);
         const nextCounter = counter + 1;
         setCounter(nextCounter);
         jsonLocalStorage.setItem('counter', nextCounter);
